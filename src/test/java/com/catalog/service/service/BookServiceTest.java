@@ -49,7 +49,7 @@ class BookServiceTest {
         var actual = assertThatThrownBy(() -> bookService.viewBookDetails(bookIsbn));
 
         //THEN
-        actual.isInstanceOf(BookAlreadyExistsException.class)
+        actual.isInstanceOf(BookNotFoundException.class)
                 .hasMessage("The book with ISBN " + bookIsbn + " was not found.");
     }
 }
