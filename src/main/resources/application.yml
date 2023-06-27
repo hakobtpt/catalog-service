@@ -6,3 +6,9 @@ server:
     threads:
       max: 50
       min-spare: 5
+
+spring:
+  application:
+    name: catalog-service
+polar:
+  greeting: Welcome to the book catalog!
