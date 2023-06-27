@@ -1,17 +1,18 @@
 package com.catalog.service.controller;
 
-import org.springframework.beans.factory.annotation.Value;
+import com.catalog.service.config.PolarProperties;
+import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
+@RequiredArgsConstructor
 public class HomeController {
 
-    @Value("${polar.greeting}")
-    private String polarGreeting;
+    private final PolarProperties polarProperties;
 
     @GetMapping("/")
     public String getGreeting() {
-        return polarGreeting;
+        return polarProperties.getGreeting();
     }
 }
