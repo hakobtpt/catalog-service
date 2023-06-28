@@ -12,9 +12,6 @@ management:
       exposure:
         include: refresh
 spring:
-  sql:
-    init:
-      mode: always
   datasource:
       username: postgres
       password: postgres
