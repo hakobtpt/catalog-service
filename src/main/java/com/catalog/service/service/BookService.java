@@ -13,7 +13,7 @@ public class BookService {
 
     private final BookRepository bookRepository;
 
-    public Iterable<Book> viewBookList(){
+    public Iterable<Book> viewBookList() {
         return bookRepository.findAll();
     }
 
@@ -42,6 +42,7 @@ public class BookService {
                             book.title(),
                             book.author(),
                             book.price(),
+                            book.publisher(),
                             existingBook.createdDate(),
                             existingBook.lastModifiedDate(),
                             existingBook.version());

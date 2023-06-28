@@ -12,7 +12,6 @@ import org.springframework.data.annotation.Version;
 import java.time.Instant;
 
 public record Book(
-
         @Id
         Long id,
         @NotBlank(message = "The book ISBN must be defined.")
@@ -29,6 +28,7 @@ public record Book(
         @Positive(message = "The book price must be greater than zero.")
         Double price,
 
+        String publisher,
         @CreatedDate
         Instant createdDate,
         @LastModifiedDate
@@ -36,7 +36,7 @@ public record Book(
         @Version
         int version
 ) {
-    public static Book of(String isbn, String title, String author, Double price) {
-        return new Book(null, isbn, title, author, price, null, null , 0);
+    public static Book of(String isbn, String title, String author, Double price, String publisher) {
+        return new Book(null, isbn, title, author, price, publisher, null, null, 0);
     }
 }
