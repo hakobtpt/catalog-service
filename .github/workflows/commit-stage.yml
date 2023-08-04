@@ -86,8 +86,8 @@ jobs:
         #Relies on the Buildpacks integration in Spring Boot to build a container
         #image and defines the name for the release candidate
         run: |
-          chmod +x gradlew 
-          ./gradlew bootBuildImage \             
+          chmod +x gradlew
+          ./gradlew bootBuildImage \
             --imageName ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ env.VERSION }}
       - name: OCI image vulnerability scanning
         #Scans the release candidate image for vulnerabilities using grype
