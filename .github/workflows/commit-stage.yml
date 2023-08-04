@@ -2,11 +2,8 @@ name: Commit Stage
 on: push
 
 env:
-  #Uses the GitHub Container Registry
   REGISTRY: ghcr.io
-  #The name of the image. Remember to add your GitHub username, all in lowercase.
-  IMAGE_NAME: hakobtp/catalog-service
-  #For the moment, any new image will be tagged as “latest”.
+  IMAGE_NAME: polarbookshop/catalog-service
   VERSION: latest
 
 jobs:
@@ -14,108 +11,73 @@ jobs:
     name: Build and Test
     runs-on: ubuntu-22.04
     permissions:
-      actions: read
       contents: read
       security-events: write
     steps:
       - name: Checkout source code
-        #Checks out the current Git repository (catalog-service)
         uses: actions/checkout@v3
       - name: Set up JDK
-        #Installs and configures a Java runtime
         uses: actions/setup-java@v3
-        #Defines which version, distribution, and cache type to use
         with:
           distribution: temurin
           java-version: 17
           cache: gradle
-      - name: Code vulnerability scanning
-        #Scans the codebase for vulnerabilities using grype
-        uses: anchore/scan-action@v3
-        #Assigns an identifier to the current step so that it can be referenced from subsequent steps
-        id: scan
-        with:
-          #The path to the checked-out repository
-          path: "${{ github.workspace }}"
-          #Whether to fail the build in the event of security vulnerabilities
-          fail-build: false
-          #The minimum security category to be considered as an error (low, medium, high, critical)
-          severity-cutoff: high
-      - name: Upload vulnerability report
-        #Uploads the security vulnerability report to GitHub (SARIF format)
-        uses: github/codeql-action/upload-sarif@v2
-        #Uploads the report even if the previous step fails
-        if: success() || failure()
-        with:
-          #Fetches the report from the output of the previous step
-          sarif_file: ${{ steps.scan.outputs.sarif }}
       - name: Build, unit tests and integration tests
-        #Ensures the Gradle wrapper is executable, solving Windows incompatibilities
-        #Runs the Gradle build task, which compiles the codebase and runs unit and integration tests
         run: |
           chmod +x gradlew
           ./gradlew build
-  # The job’s unique identifier
+      - name: Code vulnerability scanning
+        uses: anchore/scan-action@v3
+        id: scan
+        with:
+          path: "${{ github.workspace }}"
+          fail-build: false
+          severity-cutoff: high
+      - name: Upload vulnerability report
+        uses: github/codeql-action/upload-sarif@v2
+        if: success() || failure()
+        with:
+          sarif_file: ${{ steps.scan.outputs.sarif }}
   package:
     name: Package and Publish
-    #Runs the job only on the master branch
-    if: ${{ github.ref == 'refs/heads/master' }}
-    #Runs the job only if the “build” job completes successfully
+    if: ${{ github.ref == 'refs/heads/main' }}
     needs: [ build ]
-    #Runs the job on an Ubuntu 22.04 machine
     runs-on: ubuntu-22.04
     permissions:
-      #Permission to check out the current Git repository
       contents: read
-      #Permission to upload images to GitHub Container Registry
       packages: write
-      #Permission to submit security events to GitHub
       security-events: write
     steps:
       - name: Checkout source code
-        #Checks out the current Git repository (catalog-service)
         uses: actions/checkout@v3
       - name: Set up JDK
-        #Installs and configures a Java runtime
         uses: actions/setup-java@v3
         with:
           distribution: temurin
           java-version: 17
           cache: gradle
       - name: Build container image
-        #Relies on the Buildpacks integration in Spring Boot to build a container
-        #image and defines the name for the release candidate
         run: |
           chmod +x gradlew
           ./gradlew bootBuildImage \
             --imageName ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ env.VERSION }}
       - name: OCI image vulnerability scanning
-        #Scans the release candidate image for vulnerabilities using grype
         uses: anchore/scan-action@v3
         id: scan
-        #The image to scan is the release candidate.
         with:
           image: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ env.VERSION }}
-          #It won’t fail the build if vulnerabilities are found in the image.
           fail-build: false
           severity-cutoff: high
-          acs-report-enable: true
       - name: Upload vulnerability report
-        #Uploads the security vulnerability report to GitHub (SARIF format)
         uses: github/codeql-action/upload-sarif@v2
         if: success() || failure()
         with:
           sarif_file: ${{ steps.scan.outputs.sarif }}
       - name: Log into container registry
-        #Authenticates with GitHub Container Registry
         uses: docker/login-action@v2
         with:
-          #The registry value as defined in the environment variable earlier
           registry: ${{ env.REGISTRY }}
-          #The GitHub username of the current user, provided by GitHub Actions
           username: ${{ github.actor }}
-          #The token needed to authenticate with the registry, provided by GitHub Actions
           password: ${{ secrets.GITHUB_TOKEN }}
-      #Pushes the release candidate to the registry
       - name: Publish container image
         run: docker push ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ env.VERSION }}
