@@ -5,7 +5,7 @@ env:
   #Uses the GitHub Container Registry
   REGISTRY: ghcr.io
   #The name of the image. Remember to add your GitHub username, all in lowercase.
-  IMAGE_NAME: hakobtp/catalog-service
+  IMAGE_NAME: hakobtpt/catalog-service
   #For the moment, any new image will be tagged as “latest”.
   VERSION: latest
 
