@@ -58,8 +58,8 @@ jobs:
   # The job’s unique identifier
   package:
     name: Package and Publish
-    #Runs the job only on the main branch
-    if: ${{ github.ref == 'refs/heads/main' }}
+    #Runs the job only on the master branch
+    if: ${{ github.ref == 'refs/heads/master' }}
     #Runs the job only if the “build” job completes successfully
     needs: [ build ]
     #Runs the job on an Ubuntu 22.04 machine
