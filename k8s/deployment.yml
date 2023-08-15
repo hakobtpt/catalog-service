@@ -5,6 +5,7 @@ metadata:
   labels:
     app: catalog-service
 spec:
+  replicas: 2
   #Defines the labels used to select the Pods to be scaled
   selector:
     matchLabels:
@@ -24,6 +25,10 @@ spec:
           image: catalog-service
           #Instructs Kubernetes to pull the image from a container registry only if it’s not present locally yet
           imagePullPolicy: IfNotPresent
+          lifecycle:
+            preStop:
+              exec:
+                command: [ "sh", "-c", "sleep 5" ]
           ports:
             #The ports exposed by the container
             - containerPort: 9001

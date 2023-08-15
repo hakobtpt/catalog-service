@@ -1,5 +1,6 @@
 server:
   port: 9001
+  shutdown: graceful
   tomcat:
     connection-timeout: 2s
     keep-alive-timeout: 15s
@@ -24,6 +25,8 @@ spring:
   application:
     #The name of the application, used by the config server to filter the configuration
     name: catalog-service
+  lifecycle:
+    timeout-per-shutdown-phase: 15s
   config:
   #Imports configuration data from a config server when available
     import: "optional:configserver:"
